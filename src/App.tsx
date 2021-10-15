@@ -1,9 +1,11 @@
-import CreateFeedbackPage from './pages/CreateFeedbackPage'
+import { BrowserRouter as Router } from 'react-router-dom';
 import FeedbackPage from './pages/FeedbackPage'
 
 function App() {
   return (
-    <FeedbackPage />
+    <Router>
+      <FeedbackPage />
+    </Router>
   );
 }
 

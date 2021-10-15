@@ -1,17 +1,27 @@
 import React, {Fragment} from 'react'
 import {Field, Form, Formik} from 'formik'
 import { makeStyles, Card, TextField, Typography, Container, Button, CardContent } from "@material-ui/core/";
+import DeleteOutline from "@material-ui/icons/DeleteOutline";
+import Edit from "@material-ui/icons/Edit";
 
 export interface FeedbackBoxProps {
   Title: string,
   Description: string,
-  Rating: Number
+  Rating: Number,
+  openEditDialog: () => void,
+  closeEditDialog: () => void,
+  openDeleteDialog: () => void,
+  closeDeleteDialog: () => void,
 }
 
 const Feedback: React.FC<FeedbackBoxProps> = ({
   Title,
   Description,
   Rating,
+  openEditDialog,
+  openDeleteDialog,
+  closeEditDialog,
+  closeDeleteDialog,
 }) => {
   const useStyles = makeStyles((theme) => ({
     feedbackContainer: {
@@ -19,12 +29,6 @@ const Feedback: React.FC<FeedbackBoxProps> = ({
       marginTop: "5px",
       marginBottom: "5px",
       width: "100%",
-      transition: "all .25s linear",
-      boxShadow: "0px 1px 2px 0px rgba(0,0,0,0.4)",
-
-      "&:hover": {
-        boxShadow: "-1px 10px 29px 0px rgba(0,0,0,0.6)"
-      },
     },
     
     leftContent: {
@@ -34,6 +38,18 @@ const Feedback: React.FC<FeedbackBoxProps> = ({
     rightContent: {
       textAlign: "right",
       width: "50%"
+    },
+    icon: {
+      margin: theme.spacing(1),
+      fontSize: 32,
+      transition: "all .25s linear",
+      borderRadius: "5px",
+      // boxShadow: "0px 1px 2px 0px rgba(0,0,0,0.4)",
+      marginRight: "5px",
+
+      "&:hover": {
+        boxShadow: "-1px 10px 29px 0px rgba(0,0,0,0.4)"
+      },
     },
   }))
   const classes = useStyles();
@@ -57,6 +73,11 @@ const Feedback: React.FC<FeedbackBoxProps> = ({
                 </Typography>
               </CardContent>
               <CardContent className={classes.rightContent}>
+                <CardContent>
+                  <Edit className={classes.icon} onClick={openEditDialog}/>
+                  <DeleteOutline className={classes.icon} onClick={openDeleteDialog}/>
+                </CardContent>
+                
                 <Typography component="h1" variant="caption">
                   {Rating}
                 </Typography>
