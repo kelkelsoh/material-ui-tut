@@ -1,27 +1,22 @@
-import React, {Fragment} from 'react'
-import {Field, Form, Formik} from 'formik'
-import { makeStyles, Card, TextField, Typography, Container, Button, Dialog, DialogContent } from "@material-ui/core/";
+import React, { useState } from 'react'
+import { makeStyles, TextField, Typography, Container, Button, Dialog } from "@material-ui/core/";
+import RatingComponent from '@mui/material/Rating';
 
-export interface EditFeedbackDialogProps {
-  EditDialogState: boolean,
-  AbortEditDialog: () => void,
-  handleInputchange: (event: any) => void,
+export interface CreateFeedbackDialogProps {
+  CreateDialogState: boolean,
+  AbortCreateDialog: () => void,
   setFormValues: (event: React.FormEvent<HTMLFormElement>) => void,
-  Title: string,
-  Description: string,
-  Rating: Number,
 }
 
-const EditFeedbackDialog: React.FC <EditFeedbackDialogProps> = ({
-  EditDialogState,
-  AbortEditDialog,
-  handleInputchange,
+const CreateFeedbackDialog: React.FC <CreateFeedbackDialogProps> = ({
+  CreateDialogState,
+  AbortCreateDialog,
   setFormValues,
-  Title,
-  Description,
-  Rating,
 }) => {
   const useStyles = makeStyles((theme) => ({
+    hidden: {
+      display: 'none'
+    },
     form: {
       width: '100%',
       marginTop: theme.spacing(1),
@@ -37,14 +32,16 @@ const EditFeedbackDialog: React.FC <EditFeedbackDialogProps> = ({
     },
   }))
   const classes = useStyles();
+
+  let [rating, setRating] = useState(1);
   
   return (
     <Dialog
-    open={EditDialogState}
-    onClose={AbortEditDialog}
+    open={CreateDialogState}
+    onClose={AbortCreateDialog}
     >
       <Container component="main" maxWidth="xs">
-        <div className={classes.paper}>
+        <Container className={classes.paper}>
           <Typography component="h1" variant="h5">
             Feedback Form
           </Typography>
@@ -61,8 +58,6 @@ const EditFeedbackDialog: React.FC <EditFeedbackDialogProps> = ({
               name="titlestr"
               autoComplete="title"
               autoFocus
-              value={Title}
-              onChange={handleInputchange}
             />
             <TextField
               variant="outlined"
@@ -73,22 +68,27 @@ const EditFeedbackDialog: React.FC <EditFeedbackDialogProps> = ({
               label="Description"
               name="description"
               autoComplete="description"
-              value={Description}
-              onChange={handleInputchange}
             />
             <TextField
-              type="number"
-              variant="outlined"
-              margin="normal"
+              className={classes.hidden}
               required
-              fullWidth
+              value={rating}
               id="rating"
               label="Rating"
               name="rating"
               autoComplete="rating"
-              InputProps={{ inputProps: { min: 1, max: 5 } }}
-              value={Rating}
-              onChange={handleInputchange}
+            />
+            <Typography component="legend">
+              Rating:
+            </Typography>
+            <RatingComponent
+             defaultValue={1}
+             onChange={(event, newValue) => {
+                if(Number(newValue) < 1) {
+                  newValue = 1;
+                }
+                setRating(Number(newValue));
+              }}
             />
             <Button
               type="submit"
@@ -97,16 +97,14 @@ const EditFeedbackDialog: React.FC <EditFeedbackDialogProps> = ({
               color="primary"
               className={classes.submit}
             >
-              Edit
+              Submit
             </Button>
           </form>
-        </div>
         </Container>
+      </Container>
     </Dialog>
   )
-
-  
 }
-export default EditFeedbackDialog
+export default CreateFeedbackDialog
 
 

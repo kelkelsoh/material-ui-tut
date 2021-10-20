@@ -1,17 +1,16 @@
-import React, {Fragment} from 'react'
-import {Field, Form, Formik} from 'formik'
-import { makeStyles, Card, TextField, Typography, Container, Button, CardContent } from "@material-ui/core/";
-import DeleteOutline from "@material-ui/icons/DeleteOutline";
-import Edit from "@material-ui/icons/Edit";
+import React, { Fragment } from 'react'
+import { LinearProgress, makeStyles, Card, Typography, Container, Button, CardContent, CircularProgress } from "@material-ui/core/";
+
+import {Edit, DeleteOutline} from "@material-ui/icons";
+import RatingComponent from '@mui/material/Rating';
 
 export interface FeedbackBoxProps {
   Title: string,
   Description: string,
-  Rating: Number,
-  openEditDialog: () => void,
-  closeEditDialog: () => void,
+  Rating: number,
+  openEditDialog: (title: string, desc: string, rating: number) => void,
   openDeleteDialog: () => void,
-  closeDeleteDialog: () => void,
+  isLoading: boolean,
 }
 
 const Feedback: React.FC<FeedbackBoxProps> = ({
@@ -20,9 +19,12 @@ const Feedback: React.FC<FeedbackBoxProps> = ({
   Rating,
   openEditDialog,
   openDeleteDialog,
-  closeEditDialog,
-  closeDeleteDialog,
+  isLoading
 }) => {
+  const setEditValues = () => {
+    openEditDialog(Title, Description, Rating);
+  }
+
   const useStyles = makeStyles((theme) => ({
     feedbackContainer: {
       display: "flex",
@@ -30,7 +32,6 @@ const Feedback: React.FC<FeedbackBoxProps> = ({
       marginBottom: "5px",
       width: "100%",
     },
-    
     leftContent: {
       textAlign: "left",
       width: "100%"
@@ -39,22 +40,47 @@ const Feedback: React.FC<FeedbackBoxProps> = ({
       textAlign: "right",
       width: "50%"
     },
-    icon: {
-      margin: theme.spacing(1),
-      fontSize: 32,
-      transition: "all .25s linear",
-      borderRadius: "5px",
-      // boxShadow: "0px 1px 2px 0px rgba(0,0,0,0.4)",
-      marginRight: "5px",
-
-      "&:hover": {
-        boxShadow: "-1px 10px 29px 0px rgba(0,0,0,0.4)"
-      },
+    rating: {
+      marginRight: "16px"
     },
+    loading: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      width: "100%",
+    }
   }))
+
   const classes = useStyles();
   
-  return (
+  return isLoading ? (
+    <Fragment>
+        <Container component="main" maxWidth="lg">
+            <Card className={classes.feedbackContainer}>
+              <CardContent className={classes.loading}>
+                <CircularProgress color="primary"/>
+              </CardContent>
+              <CardContent className={classes.rightContent}>
+                <CardContent>
+                  <Button>
+                  <CircularProgress
+                    size={20}
+                    color="inherit" 
+                  />
+                  </Button>
+                  <Button>
+                  <CircularProgress
+                    size={20}
+                    color="inherit" 
+                  />
+                  </Button>
+                </CardContent>
+                <LinearProgress />
+              </CardContent>
+            </Card>
+         </Container>
+    </Fragment>
+  ) : (
     <Fragment>
         <Container component="main" maxWidth="lg">
             <Card className={classes.feedbackContainer}>
@@ -74,20 +100,19 @@ const Feedback: React.FC<FeedbackBoxProps> = ({
               </CardContent>
               <CardContent className={classes.rightContent}>
                 <CardContent>
-                  <Edit className={classes.icon} onClick={openEditDialog}/>
-                  <DeleteOutline className={classes.icon} onClick={openDeleteDialog}/>
+                  <Button>
+                    <Edit onClick={setEditValues}/>
+                  </Button>
+                  <Button>
+                    <DeleteOutline onClick={openDeleteDialog}/>
+                  </Button>
                 </CardContent>
-                
-                <Typography component="h1" variant="caption">
-                  {Rating}
-                </Typography>
+                <RatingComponent className={classes.rating} value={Rating} readOnly />
               </CardContent>
             </Card>
          </Container>
     </Fragment>
   )
-
-  
 }
 export default Feedback
 

@@ -1,13 +1,37 @@
-import React, {Fragment, useState} from 'react'
-import {Field, Form, Formik} from 'formik'
-import { makeStyles, Card, TextField, Typography, Container, Button } from "@material-ui/core/";
+import React, { Fragment, useEffect, useState } from 'react'
+import { LinearProgress, CircularProgress, makeStyles, Typography, Container, Button, Grid } from "@material-ui/core/";
 import FeedbackCard from '../components/Feedback'
-import { useHistory } from "react-router-dom";
-import CreateFeedbackDialog from './CreateFeedbackDialog';
-import EditFeedbackDialog from './EditFeedbackDialog';
-import DeleteFeedbackDialog from './DeleteFeedbackDialog';
+import CreateFeedbackDialog from './Dialogs/CreateFeedbackDialog';
+import EditFeedbackDialog from './Dialogs/EditFeedbackDialog';
+import DeleteFeedbackDialog from './Dialogs/DeleteFeedbackDialog';
+import FeedbackModel from '../model/FeedbackModel';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 
 const FeedbackPage: React.FC = () => {
+  const FEEDBACK_DEFAULT_VALUES : FeedbackModel = {
+    id: 1,
+    title: "",
+    description:"",
+    rating: 1
+  }
+  const [feedbackData, setFeedbackData] = useState<Array<FeedbackModel>>([FEEDBACK_DEFAULT_VALUES]);
+  const [isLoading, setIsloading] = useState(false);
+
+  const axiosConfig: AxiosRequestConfig = {
+    method: 'get',
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Allow-Credentials': 'true'}
+  }
+  const loadFeedbackData = async () => {
+    const response = await axios.get('http://localhost:8080/feedback', axiosConfig)
+    .catch((error) => {
+      return error;
+    });
+    return response;
+  }
+
   const useStyles = makeStyles((theme) => ({
     form: {
       width: '100%',
@@ -30,14 +54,13 @@ const FeedbackPage: React.FC = () => {
     header: {
       fontWeight: "bold",
       margin: theme.spacing(3, 0, 2),
+    },
+    linearLoad: {
+      justifyContent: "center",
+      alignItems: "center",
     }
   }))
   const classes = useStyles();
-  const history = useHistory();
-
-  const navigate = async (path: string) => {
-    history.push(path);
-  }
 
   //Create Dialog
   const [CreateFeedbackDialogState, setCreateFeedbackDialogState] = useState(false);
@@ -75,13 +98,14 @@ const FeedbackPage: React.FC = () => {
 
   //Edit Dialog
   const [EditFeedbackDialogState, setEditFeedbackDialogState] = useState(false);
-  const [EditFormValues, setEditFormValues] = useState({})
   const [currentTitle, setCurrentTitle] = useState("")
   const [currentDescription, setCurrentDescription] = useState("")
   const [currentRating, setCurrentRating] = useState(1)
 
-
-  const openEditFeedbackDialog = () => {
+  const openEditFeedbackDialog = (title: string, desc: string, rating: number) => {
+    setCurrentTitle(title);
+    setCurrentDescription(desc);
+    setCurrentRating(rating);
     setEditFeedbackDialogState(true);
   }
 
@@ -145,11 +169,55 @@ const FeedbackPage: React.FC = () => {
       
     }
   };
+
+  useEffect(() => {
+    setIsloading(true);
+    loadFeedbackData().then((response) => {
+      setFeedbackData(response.data)
+      setIsloading(false);
+    });
+  }, [])
   
-  return (
+  return isLoading ? (
     <Fragment>
         <Container component="main" maxWidth="md">
-          <div className={classes.paper}>
+          <Container className={classes.paper}>
+          <Container className={classes.headerContainer}>
+              <Grid
+              container
+              alignItems={'center'}
+              >
+                <Grid xs={6} item>
+                  <LinearProgress />
+                </Grid>
+              </Grid>
+              <Button
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+              >
+              <CircularProgress
+                size={20}
+                color="inherit" 
+              />
+              </Button>
+            </Container>
+            <FeedbackCard
+                isLoading={isLoading}
+                Title={""}
+                Description={""}
+                Rating={1}
+                openEditDialog={openEditFeedbackDialog}
+                openDeleteDialog={openDeleteFeedbackDialog}
+            />
+          </Container>
+        </Container>
+    </Fragment>
+  )
+  :  (
+    <Fragment>
+        <Container component="main" maxWidth="md">
+          <Container className={classes.paper}>
             <CreateFeedbackDialog 
             CreateDialogState={CreateFeedbackDialogState}
             AbortCreateDialog={closeCreateFeedbackDialog}
@@ -160,6 +228,7 @@ const FeedbackPage: React.FC = () => {
             AbortEditDialog={closeEditFeedbackDialog}
             handleInputchange={handleInputChange}
             setFormValues={editFormSubmitted}
+            setRating={setCurrentRating}
             Title={currentTitle}
             Description={currentDescription}
             Rating={currentRating}
@@ -169,7 +238,7 @@ const FeedbackPage: React.FC = () => {
             closeDeleteDialog={closeDeleteFeedbackDialog}
             confirmDelete={deleteFormSubmitted}
             />
-            <div className={classes.headerContainer}>
+            <Container className={classes.headerContainer}>
               <Typography className={classes.header} component="div" variant="h5">
                 Feedback Home
               </Typography>
@@ -181,31 +250,23 @@ const FeedbackPage: React.FC = () => {
               >
                 Create
               </Button>
-            </div>
-            <FeedbackCard
-              Title="Nature Around Us"
-              Description="We are going to learn different kinds of species in nature that live together to form amazing environment."
-              Rating={5.4}
-              openEditDialog={openEditFeedbackDialog}
-              closeEditDialog={closeEditFeedbackDialog}
-              openDeleteDialog={openDeleteFeedbackDialog}
-              closeDeleteDialog={closeDeleteFeedbackDialog}
-            />
-            <FeedbackCard
-              Title="Nature Around Us"
-              Description="We are going to learn different kinds of species in nature that live together to form amazing environment."
-              Rating={5.4}
-              openEditDialog={openEditFeedbackDialog}
-              closeEditDialog={closeEditFeedbackDialog}
-              openDeleteDialog={openDeleteFeedbackDialog}
-              closeDeleteDialog={closeDeleteFeedbackDialog}
-            />
-          </div>
+            </Container>
+            {feedbackData.map((item)=>{
+              return (
+              <FeedbackCard
+                key={item.id}
+                isLoading={isLoading}
+                Title={item.title}
+                Description={item.description}
+                Rating={item.rating}
+                openEditDialog={openEditFeedbackDialog}
+                openDeleteDialog={openDeleteFeedbackDialog}
+              />)
+            })}
+          </Container>
         </Container>
     </Fragment>
-  )
-
-  
+  ) 
 }
 export default FeedbackPage
 
