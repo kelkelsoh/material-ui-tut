@@ -34,6 +34,19 @@ const CreateFeedbackDialog: React.FC <CreateFeedbackDialogProps> = ({
   const classes = useStyles();
 
   let [rating, setRating] = useState(1);
+
+  const [showDescError, setShowDescError] = useState(false);
+
+  const validateValues = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const description = event.currentTarget.description.value.trim();
+
+    if(description.split(" ").length < 3) {
+      setShowDescError(true);
+    } else {
+      setFormValues(event);
+    }
+  }
   
   return (
     <Dialog
@@ -46,7 +59,7 @@ const CreateFeedbackDialog: React.FC <CreateFeedbackDialogProps> = ({
             Feedback Form
           </Typography>
           <form
-          onSubmit={setFormValues}
+          onSubmit={validateValues}
           className={classes.form}>
             <TextField
               variant="outlined"
@@ -60,6 +73,8 @@ const CreateFeedbackDialog: React.FC <CreateFeedbackDialogProps> = ({
               autoFocus
             />
             <TextField
+              error={showDescError}
+              helperText="Description must be at least 3 words."
               variant="outlined"
               margin="normal"
               required

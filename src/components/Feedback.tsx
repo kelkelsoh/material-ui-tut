@@ -1,19 +1,22 @@
-import React, { Fragment } from 'react'
-import { LinearProgress, makeStyles, Card, Typography, Container, Button, CardContent, CircularProgress } from "@material-ui/core/";
+import React, { Fragment, useEffect, useState } from 'react'
+import { LinearProgress, makeStyles, Card, Typography, Container, Button, CardContent, CircularProgress, Tooltip } from "@material-ui/core/";
 
 import {Edit, DeleteOutline} from "@material-ui/icons";
 import RatingComponent from '@mui/material/Rating';
+import Collapse from '@mui/material/Collapse';
 
 export interface FeedbackBoxProps {
+  ID: number,
   Title: string,
   Description: string,
   Rating: number,
-  openEditDialog: (title: string, desc: string, rating: number) => void,
-  openDeleteDialog: () => void,
+  openEditDialog: (id: number, title: string, desc: string, rating: number) => void,
+  openDeleteDialog: (id: number) => void,
   isLoading: boolean,
 }
 
 const Feedback: React.FC<FeedbackBoxProps> = ({
+  ID,
   Title,
   Description,
   Rating,
@@ -22,7 +25,11 @@ const Feedback: React.FC<FeedbackBoxProps> = ({
   isLoading
 }) => {
   const setEditValues = () => {
-    openEditDialog(Title, Description, Rating);
+    openEditDialog(ID, Title, Description, Rating);
+  }
+
+  const setDeleteValues = () => {
+    openDeleteDialog(ID);
   }
 
   const useStyles = makeStyles((theme) => ({
@@ -31,6 +38,7 @@ const Feedback: React.FC<FeedbackBoxProps> = ({
       marginTop: "5px",
       marginBottom: "5px",
       width: "100%",
+      boxShadow: "5px 5px 15px 3px rgba(0,0,0,0.19);",
     },
     leftContent: {
       textAlign: "left",
@@ -52,8 +60,13 @@ const Feedback: React.FC<FeedbackBoxProps> = ({
   }))
 
   const classes = useStyles();
-  
-  return isLoading ? (
+
+  const [collapseToggle, setCollapseToggle] = useState(false);
+  useEffect(() => {
+    setCollapseToggle(true);
+  }, [isLoading]);
+
+  const loadingElement = (
     <Fragment>
         <Container component="main" maxWidth="lg">
             <Card className={classes.feedbackContainer}>
@@ -80,7 +93,9 @@ const Feedback: React.FC<FeedbackBoxProps> = ({
             </Card>
          </Container>
     </Fragment>
-  ) : (
+  )
+
+  const successElement = (
     <Fragment>
         <Container component="main" maxWidth="lg">
             <Card className={classes.feedbackContainer}>
@@ -100,12 +115,16 @@ const Feedback: React.FC<FeedbackBoxProps> = ({
               </CardContent>
               <CardContent className={classes.rightContent}>
                 <CardContent>
+                  <Tooltip title="Edit Feedback">
+                    <Button>
+                      <Edit onClick={setEditValues}/>
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title="Delete Feedback">
                   <Button>
-                    <Edit onClick={setEditValues}/>
+                    <DeleteOutline onClick={setDeleteValues}/>
                   </Button>
-                  <Button>
-                    <DeleteOutline onClick={openDeleteDialog}/>
-                  </Button>
+                  </Tooltip>
                 </CardContent>
                 <RatingComponent className={classes.rating} value={Rating} readOnly />
               </CardContent>
@@ -113,6 +132,9 @@ const Feedback: React.FC<FeedbackBoxProps> = ({
          </Container>
     </Fragment>
   )
+  
+  return isLoading ? <div><Collapse in={collapseToggle}>{loadingElement}</Collapse></div>
+   : <div><Collapse in={collapseToggle}>{successElement}</Collapse></div>
 }
 export default Feedback
 

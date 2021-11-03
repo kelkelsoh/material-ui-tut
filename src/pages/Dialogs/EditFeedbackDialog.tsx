@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { makeStyles, TextField, Typography, Container, Button, Dialog } from "@material-ui/core/";
 import RatingComponent from '@mui/material/Rating';
 
@@ -47,6 +47,19 @@ const EditFeedbackDialog: React.FC <EditFeedbackDialogProps> = ({
   }))
   const classes = useStyles();
   
+  const [showDescError, setShowDescError] = useState(false);
+
+  const validateValues = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const description = event.currentTarget.description.value.trim();
+
+    if(description.split(" ").length < 3) {
+      setShowDescError(true);
+    } else {
+      setFormValues(event);
+    }
+  }
+
   return (
     <Dialog
     open={EditDialogState}
@@ -58,7 +71,7 @@ const EditFeedbackDialog: React.FC <EditFeedbackDialogProps> = ({
             Feedback Form
           </Typography>
           <form
-          onSubmit={setFormValues}
+          onSubmit={validateValues}
           className={classes.form}>
             <TextField
               variant="outlined"
@@ -74,6 +87,8 @@ const EditFeedbackDialog: React.FC <EditFeedbackDialogProps> = ({
               onChange={handleInputchange}
             />
             <TextField
+              error={showDescError}
+              helperText="Description must be at least 3 words."
               variant="outlined"
               margin="normal"
               required
